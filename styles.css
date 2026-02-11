@@ -1,0 +1,268 @@
+:root {
+  --bg: #1a0f14;
+  --card: #2d1820;
+  --card-border: #4a2835;
+  --text: #fce8ef;
+  --text-muted: #c9a0b0;
+  --accent: #e84a6f;
+  --accent-soft: #f0627a;
+  --yes: #4ade80;
+  --yes-hover: #22c55e;
+  --no-bg: #3d2430;
+  --valentine-card: #381c22;
+  --valentine-no-bg: #2e171b;
+  --valentine-green: #33ff99;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 74, 111, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(232, 74, 111, 0.08), transparent);
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 420px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.screen.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ----- Captcha screen ----- */
+.captcha-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.captcha-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.lock-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.captcha-header h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--text);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.captcha-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.captcha-cell {
+  aspect-ratio: 1;
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.captcha-cell:hover {
+  border-color: var(--accent);
+  background: rgba(232, 74, 111, 0.1);
+}
+
+.captcha-cell.selected {
+  border-color: var(--accent);
+  background: rgba(232, 74, 111, 0.2);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.captcha-cell.selected::after {
+  content: "✓";
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.captcha-cell {
+  position: relative;
+}
+
+.hint {
+  min-height: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.btn {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:not(:disabled):hover {
+  background: var(--accent-soft);
+}
+
+/* ----- Valentine screen ----- */
+#valentine-screen .valentine-card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.hearts-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e84a6f'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+  background-size: 48px 48px;
+}
+
+.valentine-question {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 700;
+  margin: 0 0 2rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.valentine-buttons {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+  min-height: 120px;
+  width: 216px;
+  margin: 0 auto;
+}
+
+.valentine-buttons .btn {
+  width: 100px;
+  height: 44px;
+  min-width: 100px;
+  max-width: 100px;
+  padding: 0 1rem;
+  font-size: 0.95rem;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-yes {
+  position: relative;
+  z-index: 2;
+  background: var(--yes);
+  color: #0f1f14;
+  flex-shrink: 0;
+}
+
+.btn-yes:hover {
+  background: var(--yes-hover);
+}
+
+.btn-no {
+  position: relative;
+  z-index: 1;
+  background: var(--no-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+  flex-shrink: 0;
+  transition: left 0.2s ease-out, top 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.btn-no:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.valentine-response {
+  position: relative;
+  margin-top: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--accent-soft);
+  min-height: 1.5em;
+}

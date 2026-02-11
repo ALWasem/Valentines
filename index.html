@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Captcha game screen -->
+  <main id="captcha-screen" class="screen active">
+    <div class="captcha-card">
+      <div class="captcha-header">
+        <span class="lock-icon" aria-hidden="true">🔒</span>
+        <h1>Verify you're human</h1>
+        <p class="subtitle">Select all the hearts to continue</p>
+      </div>
+      <div id="captcha-grid" class="captcha-grid" role="group" aria-label="Select all images containing a heart">
+        <!-- Filled by JS -->
+      </div>
+      <p id="captcha-hint" class="hint" aria-live="polite"></p>
+      <button type="button" id="verify-btn" class="btn btn-primary" disabled>
+        Verify
+      </button>
+    </div>
+  </main>
+
+  <!-- Valentine screen (hidden until game complete) -->
+  <main id="valentine-screen" class="screen" aria-hidden="true">
+    <div class="valentine-card">
+      <div class="hearts-bg" aria-hidden="true"></div>
+      <h2 class="valentine-question">Will you be my valentine?</h2>
+      <div class="valentine-buttons">
+        <button type="button" id="yes-btn" class="btn btn-yes">Yes!</button>
+        <button type="button" id="no-btn" class="btn btn-no">No</button>
+      </div>
+      <p id="valentine-response" class="valentine-response" aria-live="polite"></p>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
