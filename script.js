@@ -292,20 +292,21 @@
   var buttonsContainer = document.getElementById("valentine-buttons");
   var BTN_W = 100; // matches CSS width
   var BTN_H = 44;  // matches CSS height
-  var noPosIndex = -1;
+  var GAP = 16;    // gap between Yes and No
+  var lastSpotIndex = -1;
 
   function initValentineButtons() {
-    var box = buttonsContainer.getBoundingClientRect();
-    var containerW = box.width;
-    var containerH = buttonsContainer.offsetHeight; // 160px from CSS
+    var containerW = buttonsContainer.offsetWidth;
 
-    // Place Yes: horizontally centered, vertically at top
-    var yesLeft = (containerW / 2) - BTN_W / 2;
-    yesBtn.style.left = yesLeft + "px";
+    // Center both buttons together: [Yes 100px] [16px gap] [No 100px] = 216px
+    var pairW = BTN_W + GAP + BTN_W;
+    var startL = (containerW - pairW) / 2;
+
+    // Yes on the left, No on the right, both at top
+    yesBtn.style.left = startL + "px";
     yesBtn.style.top = "0px";
 
-    // Place No: right next to Yes initially
-    noBtn.style.left = (yesLeft + BTN_W + 16) + "px";
+    noBtn.style.left = (startL + BTN_W + GAP) + "px";
     noBtn.style.top = "0px";
   }
 
@@ -317,20 +318,21 @@
     var yesLeft = parseFloat(yesBtn.style.left);
     var yesTop = parseFloat(yesBtn.style.top);
 
-    // Build list of valid spots inside the container
-    // Spots are pixel positions [left, top]
+    // 9 possible spots inside the container
     var pad = 4;
     var spots = [
-      [pad, pad],                                         // top-left
-      [containerW - BTN_W - pad, pad],                    // top-right
-      [pad, containerH - BTN_H - pad],                    // bottom-left
-      [containerW - BTN_W - pad, containerH - BTN_H - pad], // bottom-right
-      [(containerW - BTN_W) / 2, containerH - BTN_H - pad], // bottom-center
-      [pad, (containerH - BTN_H) / 2],                   // mid-left
-      [containerW - BTN_W - pad, (containerH - BTN_H) / 2], // mid-right
+      [pad, pad],                                            // top-left
+      [containerW - BTN_W - pad, pad],                       // top-right
+      [pad, containerH - BTN_H - pad],                       // bottom-left
+      [containerW - BTN_W - pad, containerH - BTN_H - pad],  // bottom-right
+      [(containerW - BTN_W) / 2, containerH - BTN_H - pad],  // bottom-center
+      [pad, (containerH - BTN_H) / 2],                       // mid-left
+      [containerW - BTN_W - pad, (containerH - BTN_H) / 2],  // mid-right
+      [(containerW - BTN_W) / 2, pad],                       // top-center
+      [(containerW - BTN_W) / 2, (containerH - BTN_H) / 2],  // dead-center
     ];
 
-    // Filter out any spot that overlaps Yes button
+    // Filter out spots that overlap the Yes button
     var margin = 16;
     var valid = [];
     for (var i = 0; i < spots.length; i++) {
@@ -341,15 +343,26 @@
         st + BTN_H + margin <= yesTop ||
         st >= yesTop + BTN_H + margin
       );
-      if (!overlaps) valid.push(spots[i]);
+      if (!overlaps) valid.push(i);
     }
 
-    if (valid.length === 0) valid = spots; // fallback
+    if (valid.length === 0) {
+      for (var j = 0; j < spots.length; j++) valid.push(j);
+    }
 
-    // Cycle to next valid position
-    noPosIndex = (noPosIndex + 1) % valid.length;
-    noBtn.style.left = valid[noPosIndex][0] + "px";
-    noBtn.style.top = valid[noPosIndex][1] + "px";
+    // Pick a random valid spot that isn't the one we're already at
+    var pick;
+    if (valid.length === 1) {
+      pick = valid[0];
+    } else {
+      do {
+        pick = valid[Math.floor(Math.random() * valid.length)];
+      } while (pick === lastSpotIndex);
+    }
+    lastSpotIndex = pick;
+
+    noBtn.style.left = spots[pick][0] + "px";
+    noBtn.style.top = spots[pick][1] + "px";
   }
 
   noBtn.addEventListener("mouseenter", moveNoButton);
