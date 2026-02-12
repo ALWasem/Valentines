@@ -16,15 +16,18 @@
       <div class="captcha-header">
         <span class="lock-icon" aria-hidden="true">🔒</span>
         <h1>Verify you're human</h1>
-        <p class="subtitle">Select all the hearts to continue</p>
+        <p class="subtitle">Drag and drop tiles to restore the image</p>
       </div>
-      <div id="captcha-grid" class="captcha-grid" role="group" aria-label="Select all images containing a heart">
+      <div id="captcha-grid" class="captcha-grid" role="group" aria-label="Drag and drop tile puzzle">
         <!-- Filled by JS -->
       </div>
-      <p id="captcha-hint" class="hint" aria-live="polite"></p>
-      <button type="button" id="verify-btn" class="btn btn-primary" disabled>
-        Verify
-      </button>
+      <p id="captcha-hint" class="hint" aria-live="polite">Drag a tile onto another to swap them</p>
+      <div class="captcha-footer">
+        <span id="move-counter" class="move-counter">Moves: 0</span>
+        <button type="button" id="verify-btn" class="btn btn-primary" disabled>
+          Verify
+        </button>
+      </div>
     </div>
   </main>
 
@@ -41,6 +44,7 @@
     </div>
   </main>
 
+  <img id="puzzle-photo" src="photo.jpg" style="display:none" />
   <script src="script.js"></script>
 </body>
 </html>
