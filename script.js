@@ -373,7 +373,7 @@
   });
 
   yesBtn.addEventListener("click", function () {
-    valentineResponse.textContent = "Yay! Happy Valentine's Day! \uD83D\uDC95";
+    valentineResponse.innerHTML = "Yay! Happy Valentine\u2019s Day! \uD83D\uDC95<br>I love you to the moon and back \uD83C\uDF19";
     yesBtn.style.display = "none";
     noBtn.style.display = "none";
   });
