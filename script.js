@@ -282,6 +282,21 @@
 
   /* ── No-button evasion ── */
 
+  // Predefined offsets the No button cycles through (in card-relative fractions)
+  // Each entry is [xFraction, yFraction] where y is measured within the
+  // safe zone (below the heading, above the card bottom)
+  var noPositions = [
+    [0.85, 0.05],  // right, just below heading
+    [0.05, 0.90],  // bottom-left
+    [0.85, 0.80],  // bottom-right
+    [0.05, 0.10],  // left, near top of safe zone
+    [0.45, 0.90],  // bottom-center
+    [0.85, 0.45],  // right-center
+    [0.05, 0.50],  // left-center
+    [0.45, 0.05],  // top-center of safe zone
+  ];
+  var noPosIndex = -1;
+
   function moveNoButton() {
     var card = noBtn.closest(".valentine-card");
     if (!card) return;
@@ -290,73 +305,70 @@
     var noRect = noBtn.getBoundingClientRect();
     var yesRect = yesBtn.getBoundingClientRect();
 
-    // Where the button sits in the card without any transform
+    // Get the heading so we never overlap it
+    var heading = card.querySelector(".valentine-question");
+    var headingRect = heading ? heading.getBoundingClientRect() : null;
+
+    var bw = noRect.width;
+    var bh = noRect.height;
+
+    // Where the button sits without any transform applied
     var noHome = {
       left: noRect.left - cardRect.left,
       top: noRect.top - cardRect.top
     };
-    // Undo current transform to get the base position
     var current = noBtn.style.transform.match(/translate\((.+?)px,\s*(.+?)px\)/);
     if (current) {
       noHome.left -= parseFloat(current[1]);
       noHome.top -= parseFloat(current[2]);
     }
 
-    var bw = noRect.width;
-    var bh = noRect.height;
-    var minDist = Math.max(bw, bh) * 1.2;
+    // Yes button rect relative to card
+    var yesL = yesRect.left - cardRect.left;
+    var yesT = yesRect.top - cardRect.top;
+    var yesR = yesL + yesRect.width;
+    var yesB = yesT + yesRect.height;
 
-    // Yes button center relative to card
-    var yesCX = yesRect.left - cardRect.left + yesRect.width / 2;
-    var yesCY = yesRect.top - cardRect.top + yesRect.height / 2;
+    // Safe zone: below the heading text, inside card padding
+    var pad = 12;
+    var safeTop = headingRect
+      ? (headingRect.bottom - cardRect.top + 8)  // 8px gap below heading
+      : pad;
+    var safeLeft = pad;
+    var safeRight = cardRect.width - bw - pad;
+    var safeBottom = cardRect.height - bh - pad;
 
-    // Card inner bounds (with padding so button stays visually inside)
-    var pad = 8;
-    var minL = pad;
-    var minT = pad;
-    var maxL = cardRect.width - bw - pad;
-    var maxT = cardRect.height - bh - pad;
+    // Cycle to the next predefined position
+    noPosIndex = (noPosIndex + 1) % noPositions.length;
+    var startIdx = noPosIndex;
 
-    var bestTx = 0, bestTy = 0, bestDist = 0;
+    var targetL, targetT;
 
-    for (var i = 0; i < 60; i++) {
-      // Random angle, random distance (at least minDist)
-      var angle = Math.random() * Math.PI * 2;
-      var dist = minDist + Math.random() * 120;
-      var tx = Math.cos(angle) * dist;
-      var ty = Math.sin(angle) * dist;
+    // Try positions in order until we find one that doesn't overlap Yes or heading
+    do {
+      var frac = noPositions[noPosIndex];
+      targetL = safeLeft + frac[0] * (safeRight - safeLeft);
+      targetT = safeTop + frac[1] * (safeBottom - safeTop);
 
-      // Where the button would end up in card space
-      var finalL = noHome.left + tx;
-      var finalT = noHome.top + ty;
+      // Check overlap with Yes button (with margin)
+      var margin = 12;
+      var overlapsYes = !(
+        targetL + bw + margin < yesL ||
+        targetL > yesR + margin ||
+        targetT + bh + margin < yesT ||
+        targetT > yesB + margin
+      );
 
-      // Clamp inside card
-      finalL = Math.max(minL, Math.min(maxL, finalL));
-      finalT = Math.max(minT, Math.min(maxT, finalT));
+      if (!overlapsYes) break;
 
-      // Recalculate tx/ty after clamping
-      tx = finalL - noHome.left;
-      ty = finalT - noHome.top;
+      noPosIndex = (noPosIndex + 1) % noPositions.length;
+    } while (noPosIndex !== startIdx);
 
-      // Check distance from current position (must be at least minDist)
-      var actualDist = Math.sqrt(tx * tx + ty * ty);
-      if (actualDist < minDist * 0.8) continue;
+    // Convert target card position to a translate offset from home
+    var tx = targetL - noHome.left;
+    var ty = targetT - noHome.top;
 
-      // Check overlap with Yes button
-      var noCX = finalL + bw / 2;
-      var noCY = finalT + bh / 2;
-      var yesGap = Math.sqrt(Math.pow(noCX - yesCX, 2) + Math.pow(noCY - yesCY, 2));
-      if (yesGap < bw) continue;
-
-      // Pick the one that moved the farthest
-      if (actualDist > bestDist) {
-        bestTx = tx;
-        bestTy = ty;
-        bestDist = actualDist;
-      }
-    }
-
-    noBtn.style.transform = "translate(" + bestTx + "px, " + bestTy + "px)";
+    noBtn.style.transform = "translate(" + tx + "px, " + ty + "px)";
   }
 
   noBtn.addEventListener("mouseenter", moveNoButton);
