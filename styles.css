@@ -250,16 +250,14 @@ body {
 
 .valentine-buttons {
   position: relative;
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
+  height: 160px;
 }
 
 .btn-yes,
 .btn-no {
+  position: absolute;
   width: 100px;
   height: 44px;
-  min-width: 100px;
   font-size: 0.95rem;
   border-radius: 50px;
 }
@@ -278,7 +276,7 @@ body {
   color: var(--text-muted);
   border: 1px solid var(--card-border);
   cursor: pointer;
-  transition: transform 0.3s ease-out;
+  transition: left 0.3s ease-out, top 0.3s ease-out;
 }
 
 .valentine-response {

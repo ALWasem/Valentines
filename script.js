@@ -282,93 +282,74 @@
 
   /* ── No-button evasion ── */
 
-  // Predefined offsets the No button cycles through (in card-relative fractions)
-  // Each entry is [xFraction, yFraction] where y is measured within the
-  // safe zone (below the heading, above the card bottom)
-  var noPositions = [
-    [0.85, 0.05],  // right, just below heading
-    [0.05, 0.90],  // bottom-left
-    [0.85, 0.80],  // bottom-right
-    [0.05, 0.10],  // left, near top of safe zone
-    [0.45, 0.90],  // bottom-center
-    [0.85, 0.45],  // right-center
-    [0.05, 0.50],  // left-center
-    [0.45, 0.05],  // top-center of safe zone
-  ];
+  /*
+    Both buttons are position:absolute inside .valentine-buttons.
+    JS places Yes once (centered, never moves), then cycles No
+    through fixed spots that never overlap Yes or the heading.
+    All coordinates are relative to .valentine-buttons container.
+  */
+
+  var buttonsContainer = document.getElementById("valentine-buttons");
+  var BTN_W = 100; // matches CSS width
+  var BTN_H = 44;  // matches CSS height
   var noPosIndex = -1;
 
+  function initValentineButtons() {
+    var box = buttonsContainer.getBoundingClientRect();
+    var containerW = box.width;
+    var containerH = buttonsContainer.offsetHeight; // 160px from CSS
+
+    // Place Yes: horizontally centered, vertically at top
+    var yesLeft = (containerW / 2) - BTN_W / 2;
+    yesBtn.style.left = yesLeft + "px";
+    yesBtn.style.top = "0px";
+
+    // Place No: right next to Yes initially
+    noBtn.style.left = (yesLeft + BTN_W + 16) + "px";
+    noBtn.style.top = "0px";
+  }
+
   function moveNoButton() {
-    var card = noBtn.closest(".valentine-card");
-    if (!card) return;
+    var containerW = buttonsContainer.offsetWidth;
+    var containerH = buttonsContainer.offsetHeight;
 
-    var cardRect = card.getBoundingClientRect();
-    var noRect = noBtn.getBoundingClientRect();
-    var yesRect = yesBtn.getBoundingClientRect();
+    // Yes button position (fixed, never changes after init)
+    var yesLeft = parseFloat(yesBtn.style.left);
+    var yesTop = parseFloat(yesBtn.style.top);
 
-    // Get the heading so we never overlap it
-    var heading = card.querySelector(".valentine-question");
-    var headingRect = heading ? heading.getBoundingClientRect() : null;
+    // Build list of valid spots inside the container
+    // Spots are pixel positions [left, top]
+    var pad = 4;
+    var spots = [
+      [pad, pad],                                         // top-left
+      [containerW - BTN_W - pad, pad],                    // top-right
+      [pad, containerH - BTN_H - pad],                    // bottom-left
+      [containerW - BTN_W - pad, containerH - BTN_H - pad], // bottom-right
+      [(containerW - BTN_W) / 2, containerH - BTN_H - pad], // bottom-center
+      [pad, (containerH - BTN_H) / 2],                   // mid-left
+      [containerW - BTN_W - pad, (containerH - BTN_H) / 2], // mid-right
+    ];
 
-    var bw = noRect.width;
-    var bh = noRect.height;
-
-    // Where the button sits without any transform applied
-    var noHome = {
-      left: noRect.left - cardRect.left,
-      top: noRect.top - cardRect.top
-    };
-    var current = noBtn.style.transform.match(/translate\((.+?)px,\s*(.+?)px\)/);
-    if (current) {
-      noHome.left -= parseFloat(current[1]);
-      noHome.top -= parseFloat(current[2]);
+    // Filter out any spot that overlaps Yes button
+    var margin = 16;
+    var valid = [];
+    for (var i = 0; i < spots.length; i++) {
+      var sl = spots[i][0], st = spots[i][1];
+      var overlaps = !(
+        sl + BTN_W + margin <= yesLeft ||
+        sl >= yesLeft + BTN_W + margin ||
+        st + BTN_H + margin <= yesTop ||
+        st >= yesTop + BTN_H + margin
+      );
+      if (!overlaps) valid.push(spots[i]);
     }
 
-    // Yes button rect relative to card
-    var yesL = yesRect.left - cardRect.left;
-    var yesT = yesRect.top - cardRect.top;
-    var yesR = yesL + yesRect.width;
-    var yesB = yesT + yesRect.height;
+    if (valid.length === 0) valid = spots; // fallback
 
-    // Safe zone: below the heading text, inside card padding
-    var pad = 12;
-    var safeTop = headingRect
-      ? (headingRect.bottom - cardRect.top + 8)  // 8px gap below heading
-      : pad;
-    var safeLeft = pad;
-    var safeRight = cardRect.width - bw - pad;
-    var safeBottom = cardRect.height - bh - pad;
-
-    // Cycle to the next predefined position
-    noPosIndex = (noPosIndex + 1) % noPositions.length;
-    var startIdx = noPosIndex;
-
-    var targetL, targetT;
-
-    // Try positions in order until we find one that doesn't overlap Yes or heading
-    do {
-      var frac = noPositions[noPosIndex];
-      targetL = safeLeft + frac[0] * (safeRight - safeLeft);
-      targetT = safeTop + frac[1] * (safeBottom - safeTop);
-
-      // Check overlap with Yes button (with margin)
-      var margin = 12;
-      var overlapsYes = !(
-        targetL + bw + margin < yesL ||
-        targetL > yesR + margin ||
-        targetT + bh + margin < yesT ||
-        targetT > yesB + margin
-      );
-
-      if (!overlapsYes) break;
-
-      noPosIndex = (noPosIndex + 1) % noPositions.length;
-    } while (noPosIndex !== startIdx);
-
-    // Convert target card position to a translate offset from home
-    var tx = targetL - noHome.left;
-    var ty = targetT - noHome.top;
-
-    noBtn.style.transform = "translate(" + tx + "px, " + ty + "px)";
+    // Cycle to next valid position
+    noPosIndex = (noPosIndex + 1) % valid.length;
+    noBtn.style.left = valid[noPosIndex][0] + "px";
+    noBtn.style.top = valid[noPosIndex][1] + "px";
   }
 
   noBtn.addEventListener("mouseenter", moveNoButton);
@@ -383,6 +364,15 @@
     yesBtn.style.display = "none";
     noBtn.style.display = "none";
   });
+
+  // Position buttons when valentine screen becomes visible
+  var observer = new MutationObserver(function () {
+    if (valentineScreen.classList.contains("active")) {
+      initValentineButtons();
+      observer.disconnect();
+    }
+  });
+  observer.observe(valentineScreen, { attributes: true, attributeFilter: ["class"] });
 
   initCaptcha();
 })();
