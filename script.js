@@ -374,8 +374,8 @@
 
   yesBtn.addEventListener("click", function () {
     valentineResponse.innerHTML = "Yay! Happy Valentine\u2019s Day! \uD83D\uDC95<br>I love you to the moon and back \uD83C\uDF19";
-    yesBtn.style.display = "none";
-    noBtn.style.display = "none";
+    buttonsContainer.style.display = "none";
+    document.querySelector(".valentine-question").style.display = "none";
   });
 
   // Position buttons when valentine screen becomes visible
